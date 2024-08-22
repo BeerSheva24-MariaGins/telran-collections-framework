@@ -3,14 +3,15 @@ package telran.util;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public abstract class CollectionTest {
     protected Collection<Integer> collection;
-    Integer[] array = { 3, -10, 20, 1, 10, 8, 100, 17 };
+    Integer[] array = {3, -10, 20, 1, 10, 8, 100 , 17};
 
     @BeforeEach
     void setUp() {
@@ -38,36 +39,38 @@ public abstract class CollectionTest {
 
     @Test
     void containsTest() {
-        assertTrue(collection.contains(3));
-        assertFalse(collection.contains(999));
+        assertTrue(collection.contains(20));
+        assertFalse(collection.contains(200));
     }
 
     @Test
     void removeTest() {
-        assertTrue(collection.remove(3));
-        assertFalse(collection.remove(999));
+        assertTrue(collection.remove(20));
+        assertFalse(collection.contains(20));
         assertEquals(array.length - 1, collection.size());
+        assertFalse(collection.remove(200)); 
+    }
+
+    @Test
+    void streamTest() {
+        Stream<Integer> stream = collection.stream();
+        assertEquals(array.length, stream.count());
+    }
+
+    @Test
+    void parallelStreamTest() {
+        Stream<Integer> stream = collection.parallelStream();
+        assertEquals(array.length, stream.count());
     }
 
     @Test
     void iteratorTest() {
-        Iterator<Integer> iterator = collection.iterator();
+        var iterator = collection.iterator();
         for (int i = 0; i < array.length; i++) {
             assertTrue(iterator.hasNext());
             assertEquals(array[i], iterator.next());
         }
         assertFalse(iterator.hasNext());
-    }
-
-    @Test
-    void streamTest() {
-        long count = collection.stream().count();
-        assertEquals(array.length, count);
-    }
-
-    @Test
-    void parallelStreamTest() {
-        long count = collection.parallelStream().count();
-        assertEquals(array.length, count);
+        assertThrows(NoSuchElementException.class, iterator::next);
     }
 }
