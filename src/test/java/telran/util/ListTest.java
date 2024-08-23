@@ -1,50 +1,69 @@
 package telran.util;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-abstract public class ListTest extends CollectionTest {
-    List<Integer> list;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+abstract public class ListTest extends CollectionTest{
+    List<Integer> list;
     @Override
     void setUp() {
         super.setUp();
         list = (List<Integer>) collection;
+        
     }
-
     @Test
-    void addAtIndexTest() {
-        list.add(0, 200);
-        assertEquals(200, list.get(0));
-        assertEquals(array.length + 1, list.size());
-    }
-
-    @Test
-    void removeAtIndexTest() {
-        int removedElement = list.remove(0);
-        assertEquals(array[0], removedElement);
-        assertEquals(array.length - 1, list.size());
-    }
-
-    @Test
-    void getTest() {
-        assertEquals(array[0], list.get(0));
-        assertEquals(array[array.length - 1], list.get(array.length - 1));
-    }
-
-    @Test
-    void indexOfTest() {
-        assertEquals(0, list.indexOf(array[0]));
-        assertEquals(array.length - 1, list.indexOf(array[array.length - 1]));
-        assertEquals(-1, list.indexOf(200)); 
-    }
-
-    @Test
-    void lastIndexOfTest() {
-        list.add(array[0]); 
-        assertEquals(array.length, list.lastIndexOf(array[0]));
-        assertEquals(array.length - 1, list.lastIndexOf(array[array.length - 1]));
-        assertEquals(-1, list.lastIndexOf(200)); 
-    }
+   void removeIndexTest(){
+       Integer[] expected = {-10, 20, 1,  8, 100 };
+        assertEquals(10, (int)list.remove(4));
+        assertEquals(3, (int)list.remove(0));
+        assertEquals(17, (int)list.remove(list.size() - 1));
+        runTest(expected);
+       
+        wrongIndicesTest(() -> list.remove(list.size()));
+        wrongIndicesTest(() -> list.remove(-1));
+   }
+   @Test
+   void addIndexTest() {
+    Integer[] expected = {-3, null, 3, -10, 20, 1, -100, 10, 8, 100 , 17, 17};
+    list.add(4, -100);
+    list.add(0, -3);
+    list.add(list.size(), 17);
+    list.add(1, null);
+    runTest(expected);
+    wrongIndicesTest(() -> list.add(list.size() + 1, 1 ));
+    wrongIndicesTest(() -> list.add(-1, 1));
+   }
+   @Test 
+   void indexOfTest() {
+    setUpIndexOfMethods();
+    assertEquals(list.size() - 2, list.indexOf(17));
+    assertEquals(1, list.indexOf(null));
+    assertEquals(-1, list.indexOf(10000000));
+   }
+   private void setUpIndexOfMethods() {
+    list.add(17);
+    list.add(1, null);
+    list.add(2, null);
+}
+@Test 
+   void lastIndexOfTest() {
+    setUpIndexOfMethods();
+    assertEquals(list.size() - 1, list.lastIndexOf(17));
+    assertEquals(2, list.lastIndexOf(null));
+    assertEquals(-1, list.lastIndexOf(10000000));
+   }
+   @Test
+   void getTest() {
+        assertEquals(3, list.get(0));
+        assertEquals(10, list.get(4));
+        assertEquals(17, list.get(list.size() - 1));
+        wrongIndicesTest(() -> list.get(list.size()));
+        wrongIndicesTest(() -> list.get(-1));
+   }
+   private void wrongIndicesTest(Executable method) {
+    assertThrowsExactly(IndexOutOfBoundsException.class, method);
+   }
 }

@@ -3,74 +3,73 @@ package telran.util;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public abstract class CollectionTest {
     protected Collection<Integer> collection;
     Integer[] array = {3, -10, 20, 1, 10, 8, 100 , 17};
-
-    @BeforeEach
     void setUp() {
         Arrays.stream(array).forEach(collection::add);
     }
-
     @Test
     void addTest() {
         assertTrue(collection.add(200));
         assertTrue(collection.add(17));
-        assertEquals(array.length + 2, collection.size());
+        runTest(new Integer[]{3, -10, 20, 1, 10, 8, 100 , 17, 200, 17});
     }
-
     @Test
     void sizeTest() {
         assertEquals(array.length, collection.size());
     }
+@Test
+    void iteratorTest() {
+        Integer[] actual = new Integer[array.length];
+        int index = 0;
+        Iterator<Integer> it = collection.iterator();
+        while(it.hasNext()) {
+            actual[index++] = it.next();
+        }
+        assertArrayEquals(array, actual);
+        assertThrowsExactly(NoSuchElementException.class, it::next );
+    }
 
+    protected void runTest(Integer[] expected) {
+        assertArrayEquals(expected, collection.stream().toArray(Integer[]::new));
+        assertEquals(expected.length, collection.size());
+    }
+    @Test
+    void streamTest() {
+       runTest(array);
+    }
+    @Test
+    void removeTest() {
+        Integer[] expected = {-10, 20, 1,  8, 100 };
+        assertTrue(collection.remove(10));
+        assertTrue(collection.remove(3));
+        assertTrue(collection.remove(17));
+        runTest(expected);
+        assertFalse(collection.remove(10));
+        assertFalse(collection.remove(3));
+        assertFalse(collection.remove(17));
+        clear();
+        runTest(new Integer[0]);
+
+    }
+    private void clear() {
+        Arrays.stream(array).forEach(n -> collection.remove(n));
+    }
     @Test
     void isEmptyTest() {
         assertFalse(collection.isEmpty());
-        collection = new ArrayList<>(); 
+        clear();
         assertTrue(collection.isEmpty());
     }
-
     @Test
-    void containsTest() {
-        assertTrue(collection.contains(20));
-        assertFalse(collection.contains(200));
-    }
-
-    @Test
-    void removeTest() {
-        assertTrue(collection.remove(20));
-        assertFalse(collection.contains(20));
-        assertEquals(array.length - 1, collection.size());
-        assertFalse(collection.remove(200)); 
-    }
-
-    @Test
-    void streamTest() {
-        Stream<Integer> stream = collection.stream();
-        assertEquals(array.length, stream.count());
-    }
-
-    @Test
-    void parallelStreamTest() {
-        Stream<Integer> stream = collection.parallelStream();
-        assertEquals(array.length, stream.count());
-    }
-
-    @Test
-    void iteratorTest() {
-        var iterator = collection.iterator();
-        for (int i = 0; i < array.length; i++) {
-            assertTrue(iterator.hasNext());
-            assertEquals(array[i], iterator.next());
-        }
-        assertFalse(iterator.hasNext());
-        assertThrows(NoSuchElementException.class, iterator::next);
+    void containsTest(){
+       Arrays.stream(array).forEach(n -> assertTrue(collection.contains(n)));
+       assertFalse(collection.contains(10000000));
     }
 }
