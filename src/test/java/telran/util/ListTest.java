@@ -2,6 +2,7 @@ package telran.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Iterator;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -65,5 +66,59 @@ abstract public class ListTest extends CollectionTest{
    }
    private void wrongIndicesTest(Executable method) {
     assertThrowsExactly(IndexOutOfBoundsException.class, method);
+   }
+
+   @Test
+   public void iteratorRemoveTest() {
+       LinkedList<Integer> list = new LinkedList<>();
+       list.add(1);
+       list.add(2);
+       list.add(3);
+       list.add(4);
+       list.add(5);
+
+       Iterator<Integer> iterator = list.iterator();
+       while (iterator.hasNext()) {
+           Integer value = iterator.next();
+           if (value % 2 == 0) {
+               iterator.remove();
+           }
+       }
+
+       assertEquals(3, list.size());
+       assertEquals(1, list.get(0));
+       assertEquals(3, list.get(1));
+       assertEquals(5, list.get(2));
+   }
+
+   @Test
+   public void iteratorRemoveNoNextTest() {
+       LinkedList<Integer> list = new LinkedList<>();
+       list.add(1);
+       list.add(2);
+
+       Iterator<Integer> iterator = list.iterator();
+       iterator.next();
+       iterator.remove();
+
+       assertThrows(IllegalStateException.class, iterator::remove);
+   }
+
+   @Test
+   public void iteratorRemoveAllTest() {
+       LinkedList<Integer> list = new LinkedList<>();
+       list.add(1);
+       list.add(2);
+       list.add(3);
+
+       Iterator<Integer> iterator = list.iterator();
+       while (iterator.hasNext()) {
+           iterator.next();
+           iterator.remove();
+       }
+
+       assertEquals(0, list.size());
+       assertNull(list.head);
+       assertNull(list.tail);
    }
 }
