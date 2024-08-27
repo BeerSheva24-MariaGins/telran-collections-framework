@@ -18,7 +18,8 @@ public abstract class CollectionTest {
     Integer[] array = {3, -10, 20, 1, 10, 8, 100 , 17};
     void setUp() {
         Arrays.stream(array).forEach(collection::add);
-    }
+    }   
+
     @Test
     void removeIfTest() {
         assertTrue(collection.removeIf(n -> n % 2 == 0));
@@ -161,4 +162,24 @@ public abstract class CollectionTest {
         assertEquals(0, list.size());
     }
 
+    @Test
+    public void removeIfPerformanceTest() {
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int i = 0; i < 1000000; i++) {
+            list.add(i);
+        }
+
+        Predicate<Integer> isEven = x -> x % 2 == 0;
+
+        long startTime = System.nanoTime();
+        boolean removed = list.removeIf(isEven);
+        long endTime = System.nanoTime();
+
+        long duration = endTime - startTime;
+        System.out.println("Execution time for removeIf: " + duration + " nanoseconds");
+
+        assertTrue(removed);
+        assertEquals(500000, list.size());
+    }
+    
 }

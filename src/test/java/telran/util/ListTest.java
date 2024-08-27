@@ -121,4 +121,31 @@ abstract public class ListTest extends CollectionTest{
        assertNull(list.head);
        assertNull(list.tail);
    }
+
+   @Test
+   public void testIteratorRemovePerformance() {
+       LinkedList<Integer> list = new LinkedList<>();
+       for (int i = 0; i < 1000000; i++) {
+           list.add(i);
+       }
+
+        Iterator<Integer> iterator = list.iterator();
+       
+       long startTime = System.nanoTime();
+       while (iterator.hasNext()) {
+           Integer value = iterator.next();
+           if (value % 2 == 0) {
+               iterator.remove();
+           }
+       }
+        long endTime = System.nanoTime();
+        long duration = endTime - startTime;
+        System.out.println("Execution time for iterator remove: " + duration + " nanoseconds");
+       
+
+    //    assertEquals(500000, list.size());
+    //    for (int i = 0; i < list.size(); i++) {
+    //        assertTrue(list.get(i) % 2 != 0);
+    //    }
+    }
 }
