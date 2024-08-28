@@ -6,6 +6,8 @@ import java.util.Iterator;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import java.time.Instant;
+import java.time.Duration;
 
 abstract public class ListTest extends CollectionTest {
     List<Integer> list;
@@ -139,7 +141,10 @@ abstract public class ListTest extends CollectionTest {
 
         Iterator<Integer> iterator = list.iterator();
 
+        Instant start = Instant.now();
+
         long startTime = System.nanoTime();
+        
         while (iterator.hasNext()) {
             Integer value = iterator.next();
             if (value % 2 == 0) {
@@ -147,7 +152,10 @@ abstract public class ListTest extends CollectionTest {
             }
         }
         long endTime = System.nanoTime();
+        Instant end = Instant.now();
         long duration = endTime - startTime;
+        Duration duration_d = Duration.between(start, end);
+        System.out.println("Время выполнения: " + duration_d.toMillis() + " мс");
         System.out.println("Execution time for iterator remove: " + duration + " nanoseconds");
 
         assertEquals(500000, list.size());

@@ -9,17 +9,15 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
-import java.util.function.Predicate;
 
 public abstract class CollectionTest {
-    private static final int N_ELEMENTS = 1_000_000;
+    private static final int N_ELEMENTS = 2_000_000;
     protected Collection<Integer> collection;
     Random random = new Random();
     Integer[] array = {3, -10, 20, 1, 10, 8, 100 , 17};
     void setUp() {
         Arrays.stream(array).forEach(collection::add);
-    }   
-
+    }
     @Test
     void removeIfTest() {
         assertTrue(collection.removeIf(n -> n % 2 == 0));
@@ -32,10 +30,15 @@ public abstract class CollectionTest {
         assertTrue(collection.isEmpty());
     }
     @Test
-    void addTest() {
+    void addNonExistingTest() {
         assertTrue(collection.add(200));
+       
+        runTest(new Integer[]{3, -10, 20, 1, 10, 8, 100 , 17, 200});
+    }
+    @Test
+    void addExistingTest() {
         assertTrue(collection.add(17));
-        runTest(new Integer[]{3, -10, 20, 1, 10, 8, 100 , 17, 200, 17});
+        runTest(new Integer[]{3, -10, 20, 1, 10, 8, 100 , 17, 17});
     }
     @Test
     void sizeTest() {
@@ -108,78 +111,10 @@ public abstract class CollectionTest {
     void performanceTest() {
         collection.clear();
         IntStream.range(0, N_ELEMENTS).forEach(i -> collection.add(random.nextInt()));
+        collection.removeIf(n -> n % 2 == 0);
+        assertTrue(collection.stream().allMatch(n -> n % 2 != 0));
         collection.clear();
-
+        assertTrue(collection.isEmpty());
     }
 
-    @Test
-    public void removeIfTest1() {
-        ArrayList<Integer> list = new ArrayList<>();
-        list.add(1);
-        list.add(2);
-        list.add(3);
-        list.add(4);
-        list.add(5);
-
-        Predicate<Integer> isEven = x -> x % 2 == 0;
-        boolean removed = list.removeIf(isEven);
-
-        assertTrue(removed);
-        assertEquals(3, list.size());
-        assertEquals(1, list.get(0));
-        assertEquals(3, list.get(1));
-        assertEquals(5, list.get(2));
-    }
-
-    @Test
-    public void removeIfNoMatchTest() {
-        ArrayList<Integer> list = new ArrayList<>();
-        list.add(1);
-        list.add(3);
-        list.add(5);
-
-        Predicate<Integer> isEven = x -> x % 2 == 0;
-        boolean removed = list.removeIf(isEven);
-
-        assertFalse(removed);
-        assertEquals(3, list.size());
-        assertEquals(1, list.get(0));
-        assertEquals(3, list.get(1));
-        assertEquals(5, list.get(2));
-    }
-
-    @Test
-    public void removeIfAllMatchTest() {
-        ArrayList<Integer> list = new ArrayList<>();
-        list.add(2);
-        list.add(4);
-        list.add(6);
-
-        Predicate<Integer> isEven = x -> x % 2 == 0;
-        boolean removed = list.removeIf(isEven);
-
-        assertTrue(removed);
-        assertEquals(0, list.size());
-    }
-
-    @Test
-    public void removeIfPerformanceTest() {
-        ArrayList<Integer> list = new ArrayList<>();
-        for (int i = 0; i < 1000000; i++) {
-            list.add(i);
-        }
-
-        Predicate<Integer> isEven = x -> x % 2 == 0;
-
-        long startTime = System.nanoTime();
-        boolean removed = list.removeIf(isEven);
-        long endTime = System.nanoTime();
-
-        long duration = endTime - startTime;
-        System.out.println("Execution time for removeIf: " + duration + " nanoseconds");
-
-        assertTrue(removed);
-        assertEquals(500000, list.size());
-    }
-    
 }
