@@ -17,20 +17,37 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
 
     @Override
     public V put(K key, V value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'put'");
+        Entry<K, V> newEntry = new Entry<>(key, value);
+        Entry<K, V> existingEntry = set.get(newEntry);
+
+        if (existingEntry != null) {
+            
+            V oldValue = existingEntry.getValue();
+            existingEntry.setValue(value);
+            return oldValue;
+        } else {
+            
+            set.add(newEntry);
+            return null;
+        }
     }
+
 
     @Override
     public boolean containsKey(Object key) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'containsKey'");
+        Entry<K, V> pattern = new Entry<>((K) key, null);
+        return set.contains(pattern);
     }
 
     @Override
     public boolean containsValue(Object value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'containsValue'");
+        boolean flag = false;
+        for (Entry<K, V> entry : set) {
+            if (entry.getValue() != null && entry.getValue().equals(value)) {
+                flag = true;
+            }
+        }
+        return flag;
     }
 
     @Override
