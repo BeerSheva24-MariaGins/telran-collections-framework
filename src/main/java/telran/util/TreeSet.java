@@ -1,10 +1,11 @@
+
 package telran.util;
 
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 @SuppressWarnings("unchecked")
-public class TreeSet<T> implements Set<T> {
+public class TreeSet<T> implements SortedSet<T> {
     private static class Node<T> {
         T obj;
         Node<T> parent;
@@ -61,15 +62,19 @@ public class TreeSet<T> implements Set<T> {
         if (!contains(obj)) {
             res = true;
             Node<T> node = new Node<>(obj);
-            if(root == null) {
-                addRoot(node);
-            } else {
-                addAfterParent(node);
-            }
-            size++;
+            addNode(node);
 
         }
         return res;
+    }
+
+    private void addNode(Node<T> node) {
+        if(root == null) {
+            addRoot(node);
+        } else {
+            addAfterParent(node);
+        }
+        size++;
     }
 
     private void addAfterParent(Node<T> node) {
@@ -176,7 +181,7 @@ public class TreeSet<T> implements Set<T> {
 		return parent;
     }
 private Node<T> getNextCurrent(Node<T> current) {
-		
+		//Algorithm see on the board
 		return current.right != null ? getLeastFrom(current.right) :
 			getGreaterParent(current);
 	}
@@ -199,7 +204,7 @@ private Node<T> getNextCurrent(Node<T> current) {
 		Node<T> parent = node.parent;
 		Node<T> child = node.left != null ? node.left : node.right;
 		if(parent == null) {
-			root = child; 
+			root = child; //actual root removing
 		} else if(node == parent.left) {
 			parent.left = child;
 		} else {
@@ -216,4 +221,68 @@ private Node<T> getNextCurrent(Node<T> current) {
 		node.parent = node.left = node.right = null;
 		
 	}
+
+    @Override
+    public T first() {
+        if(root == null) {
+            throw new NoSuchElementException();
+
+        }
+        return getLeastFrom(root).obj;
+    }
+
+    @Override
+    public T last() {
+        if(root == null) {
+            throw new NoSuchElementException();
+
+        }
+        return getGreatestFrom(root).obj;
+    }
+
+    @Override
+    public T floor(T key) {
+       return floorCeilingObj(key, true);
+    }
+
+    @Override
+    public T ceiling(T key) {
+        return floorCeilingObj(key, false);
+    }
+
+    @Override
+    public SortedSet<T> subSet(T keyFrom, T keyTo) {
+       if(comparator.compare(keyFrom, keyTo) > 0) {
+        throw new IllegalArgumentException();
+       }
+       TreeSet<T> subTree = new TreeSet<>(comparator);
+       Node<T> ceilingNode = floorCeilingNode(keyFrom, false);
+            Node<T> current = ceilingNode;
+            while(current != null && comparator.compare(current.obj, keyTo) < 0) {
+                subTree.add(current.obj);
+                current = getNextCurrent(current);
+            }
+       return subTree;
+    }
+    private Node<T> floorCeilingNode(T key, boolean isFloor) {
+		Node<T> res = null;
+		int compRes = 0;
+		Node<T> current = root;
+		while (current != null && (compRes = comparator.compare(key, current.obj)) != 0) {
+			if ((compRes < 0 && !isFloor) || (compRes > 0 && isFloor)) {
+				res = current;
+			}
+			current = compRes < 0 ? current.left : current.right;
+		}
+		return current == null ? res : current;
+
+	}
+    private T floorCeilingObj(T key, boolean isFloor) {
+        T res = null;
+        Node<T> node = floorCeilingNode(key, isFloor);
+        if (node != null) {
+            res = node.obj;
+        }
+        return res;
+    }
 }
