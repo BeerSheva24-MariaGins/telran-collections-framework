@@ -2,11 +2,15 @@ package telran.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
 //{3, -10, 20, 1, 10, 8, 100 , 17}
+@SuppressWarnings("unused")
 public abstract class SortedSetTest extends SetTest {
     SortedSet<Integer> sortedSet;
 
@@ -64,5 +68,41 @@ public abstract class SortedSetTest extends SetTest {
     private Integer[] getActualSubSet(int keyFrom, int keyTo) {
         return sortedSet.subSet(keyFrom, keyTo).stream().toArray(Integer[]::new);
     }
+    @Override
+    protected void fillBigCollection(){
+        Integer[] array = getBigArrayCW();
+        Arrays.stream(array).forEach(collection::add);
+    }
 
+    
+    private void fillBalancedArray(Integer[] sortedArray, Integer[] balancedArray, int left, int right,
+     int[] currentIndexRef) {
+       if(left <= right) {
+            int rootIndex = (left + right) / 2;
+            balancedArray[currentIndexRef[0]++] = sortedArray[rootIndex];
+            fillBalancedArray(sortedArray, balancedArray, left, rootIndex - 1, currentIndexRef);
+            fillBalancedArray(sortedArray, balancedArray, rootIndex + 1, right, currentIndexRef);
+       }
+    }
+
+    protected Integer[] getBigArrayCW() {
+       return new Random().ints().distinct().limit(N_ELEMENTS).boxed().toArray(Integer[]::new);
+
+    }
+    protected Integer[] getBigArrayHW() {
+        Integer[] randomArray = getBigArrayCW();
+        Arrays.sort(randomArray);
+        Integer[] balancedArray = new Integer[randomArray.length];
+        fillBalancedArray(randomArray, balancedArray, 0, randomArray.length - 1, new int[]{0});
+        return balancedArray; 
+     }
+    @Override
+    protected void runTest(Integer[] expected) {
+        Integer[] expectedSorted = Arrays.copyOf(expected, expected.length);
+        Arrays.sort(expectedSorted);
+        Integer[] actual = collection.stream().toArray(Integer[]::new);
+        
+        assertArrayEquals(expectedSorted, actual);
+        assertEquals(expected.length, collection.size());
+    }
 }
